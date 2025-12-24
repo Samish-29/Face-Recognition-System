@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Browser</title>
+</head>
+<body>
+    <h1>Test API Connection</h1>
+    <button onclick="testApi()">Test API Connection</button>
+    <div id="result"></div>
+
+    <script>
+        async function testApi() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                // Test health endpoint
+                const healthResponse = await fetch('/api/health');
+                const healthData = await healthResponse.json();
+                
+                // Test people endpoint
+                const peopleResponse = await fetch('/api/people');
+                const peopleData = await peopleResponse.json();
+                
+                resultDiv.innerHTML = `
+                    <h2>API Test Results:</h2>
+                    <p><strong>Health:</strong> ${healthData.ok ? 'OK' : 'ERROR'}</p>
+                    <p><strong>People Count:</strong> ${peopleData.length}</p>
+                    <p><strong>Status:</strong> All tests passed!</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h2>API Test Results:</h2>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>This might indicate a CORS issue or backend not running.</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

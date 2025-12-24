@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help - FaceWhiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <custom-navbar></custom-navbar>
+    
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-3xl font-bold mb-6">Help & Documentation</h1>
+        
+        <div class="space-y-6">
+            <!-- Getting Started -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-feather="play-circle"></i> Getting Started
+                </h2>
+                <div class="space-y-4 text-gray-300">
+                    <div>
+                        <h3 class="font-semibold text-white mb-2">1. Start Recognition</h3>
+                        <p>Click the "Start Recognition" button on the Dashboard to begin face detection. Make sure your camera permissions are enabled.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-white mb-2">2. Face Detection</h3>
+                        <p>The system will automatically detect faces in the camera feed every 3 seconds. Hold still and face the camera for best results.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-white mb-2">3. Register New People</h3>
+                        <p>When an unknown face is detected, click "Register Now" to add the person to the database with their details.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-feather="info"></i> How It Works
+                </h2>
+                <div class="space-y-4 text-gray-300">
+                    <p>FaceWhiz uses advanced face recognition technology powered by face-api.js:</p>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li><strong>Face Detection:</strong> Detects faces in real-time from your webcam</li>
+                        <li><strong>Face Descriptors:</strong> Creates unique 128-dimensional vectors for each face</li>
+                        <li><strong>Matching:</strong> Compares detected faces against stored descriptors in the database</li>
+                        <li><strong>Recognition:</strong> Identifies known people or flags unknown faces for registration</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-feather="zap"></i> Features
+                </h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-400 mb-2 flex items-center gap-2">
+                            <i data-feather="users"></i> People Management
+                        </h3>
+                        <p class="text-gray-300 text-sm">View all registered people, their details, and manage the database from the People page.</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-400 mb-2 flex items-center gap-2">
+                            <i data-feather="settings"></i> Settings
+                        </h3>
+                        <p class="text-gray-300 text-sm">Adjust recognition threshold and view system status in Settings.</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-400 mb-2 flex items-center gap-2">
+                            <i data-feather="camera"></i> Real-time Recognition
+                        </h3>
+                        <p class="text-gray-300 text-sm">Continuous face detection and recognition from your webcam feed.</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-400 mb-2 flex items-center gap-2">
+                            <i data-feather="database"></i> Database Storage
+                        </h3>
+                        <p class="text-gray-300 text-sm">All face descriptors and person data are securely stored in SQLite database.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-feather="help-circle"></i> Frequently Asked Questions
+                </h2>
+                <div class="space-y-4">
+                    <div class="border-l-4 border-indigo-500 pl-4">
+                        <h3 class="font-semibold text-white mb-2">Why isn't my face being recognized?</h3>
+                        <p class="text-gray-300 text-sm">Make sure you're registered in the system. Ensure good lighting, face the camera directly, and adjust the recognition threshold in Settings if needed.</p>
+                    </div>
+                    <div class="border-l-4 border-indigo-500 pl-4">
+                        <h3 class="font-semibold text-white mb-2">Can I delete registered people?</h3>
+                        <p class="text-gray-300 text-sm">Yes! Go to the People page and click the "Delete" button on any person's card.</p>
+                    </div>
+                    <div class="border-l-4 border-indigo-500 pl-4">
+                        <h3 class="font-semibold text-white mb-2">What's the recognition threshold?</h3>
+                        <p class="text-gray-300 text-sm">The threshold determines how strict the matching is. Lower values (0.3-0.5) are more strict, higher values (0.7-0.9) are more lenient. Default is 0.6.</p>
+                    </div>
+                    <div class="border-l-4 border-indigo-500 pl-4">
+                        <h3 class="font-semibold text-white mb-2">My camera isn't working</h3>
+                        <p class="text-gray-300 text-sm">Check your browser's camera permissions. Make sure no other application is using the camera, and try refreshing the page.</p>
+                    </div>
+                    <div class="border-l-4 border-indigo-500 pl-4">
+                        <h3 class="font-semibold text-white mb-2">How accurate is the recognition?</h3>
+                        <p class="text-gray-300 text-sm">Accuracy depends on lighting conditions, angle, and image quality. For best results, use good lighting and face the camera directly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-feather="tool"></i> Troubleshooting
+                </h2>
+                <div class="space-y-3 text-gray-300">
+                    <div>
+                        <h3 class="font-semibold text-white mb-1">Camera Issues</h3>
+                        <ul class="list-disc list-inside ml-4 text-sm">
+                            <li>Grant camera permissions in your browser settings</li>
+                            <li>Check if another application is using the camera</li>
+                            <li>Try a different browser (Chrome, Firefox, Edge)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-white mb-1">Recognition Issues</h3>
+                        <ul class="list-disc list-inside ml-4 text-sm">
+                            <li>Ensure face-api.js models are loaded (check browser console)</li>
+                            <li>Verify backend is running on port 3000</li>
+                            <li>Check database connection in Settings page</li>
+                            <li>Adjust recognition threshold if getting false matches</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-white mb-1">Backend Connection</h3>
+                        <ul class="list-disc list-inside ml-4 text-sm">
+                            <li>Make sure backend server is running: <code class="bg-gray-700 px-2 py-1 rounded">npm run dev</code></li>
+                            <li>Check backend status in Settings page</li>
+                            <li>Verify API endpoints are accessible</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact/Support -->
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-feather="mail"></i> Support
+                </h2>
+                <p class="text-gray-300 mb-4">
+                    For additional support or to report issues, please check the browser console for detailed error messages.
+                    The AI chatbot on the Dashboard can also help with basic questions.
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <a href="index.html" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg inline-flex items-center gap-2">
+                <i data-feather="arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </main>
+
+    <script src="components/navbar.js"></script>
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>

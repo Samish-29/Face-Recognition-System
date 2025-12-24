@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceWhiz - Real-time Face Recognition</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <custom-navbar></custom-navbar>
+    
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Camera Feed Section -->
+            <section class="lg:w-2/3">
+                <div class="bg-gray-800 rounded-xl p-4 shadow-2xl">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                        <i data-feather="camera"></i> Live Camera Feed
+                    </h2>
+                    <div class="relative">
+                        <video id="video" width="100%" height="auto" autoplay muted class="rounded-lg border-2 border-indigo-500"></video>
+                        <canvas id="canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
+                    </div>
+                    <div class="mt-4 flex gap-4 flex-wrap">
+                        <button id="startBtn" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
+                            <i data-feather="play"></i> Start Recognition
+                        </button>
+                        <button id="stopBtn" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition hidden">
+                            <i data-feather="stop-circle"></i> Stop
+                        </button>
+                        <button id="manualRegisterBtn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
+                            <i data-feather="user-plus"></i> Register New Person
+                        </button>
+                        <button id="retryCameraBtn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg flex items-center gap-2 transition hidden">
+                            <i data-feather="refresh-cw"></i> Retry Camera
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="lg:w-1/3">
+                <div class="bg-gray-800 rounded-xl p-4 shadow-2xl h-full">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                        <i data-feather="user"></i> Recognition Results
+                    </h2>
+                    <div id="resultsContainer" class="bg-gray-700 rounded-lg p-4 min-h-[300px]">
+                        <div id="loadingIndicator" class="hidden flex flex-col items-center justify-center h-full">
+                            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+                            <p>Analyzing face...</p>
+                        </div>
+                        <div id="knownPerson" class="hidden">
+                            <div class="flex items-center gap-4 mb-4">
+                                <img id="knownPersonImg" src="" class="w-16 h-16 rounded-full object-cover border-2 border-indigo-500">
+                                <div>
+                                    <h3 class="text-xl font-bold" id="knownPersonName">John Doe</h3>
+                                    <p class="text-gray-400" id="knownPersonRole">Software Engineer</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-gray-400">Email</p>
+                                    <p id="knownPersonEmail">john@example.com</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">Phone</p>
+                                    <p id="knownPersonPhone">+1 234 567 890</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">Department</p>
+                                    <p id="knownPersonDept">Engineering</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400">Last Seen</p>
+                                    <p id="knownPersonLastSeen">2 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="unknownPerson" class="hidden">
+                            <div class="text-center py-8">
+                                <i data-feather="user-x" class="w-16 h-16 mx-auto text-red-400 mb-4"></i>
+                                <h3 class="text-xl font-bold mb-2">Unknown Person Detected</h3>
+                                <p class="text-gray-400 mb-6">This person is not in our database. Would you like to register them?</p>
+                                <button id="registerBtn" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-lg flex items-center gap-2 mx-auto transition">
+                                    <i data-feather="user-plus"></i> Register Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Registration Modal -->
+        <div id="registrationModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center p-4">
+            <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Register New Person</h3>
+                    <button id="closeModalBtn" class="text-gray-400 hover:text-white">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <div class="flex justify-center mb-4">
+                        <div class="relative">
+                            <img id="capturedImage" src="" class="w-32 h-32 rounded-full object-cover border-2 border-indigo-500">
+                            <button id="retakeBtn" class="absolute -bottom-2 -right-2 bg-indigo-600 rounded-full p-2 hover:bg-indigo-700 transition">
+                                <i data-feather="refresh-ccw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                        
+                            
+                                <label class="block text-gray-400 mb-1">Full Name</label>
+                                <input type="text" id="newPersonName" class="w-full bg-gray-700 rounded-lg px-4 py-2 border border-gray-600 focus:border-indigo-500 focus:outline-none" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-400 mb-1">Email</label>
+                                <input type="text" id="newPersonEmail" class="w-full bg-gray-700 rounded-lg px-4 py-2 border border-gray-600 focus:border-indigo-500 focus:outline-none" placeholder="email@example.com">
+                            </div>
+                            
+                        
+                            <div>
+                                <label class="block text-gray-400 mb-1">Phone</label>
+                                <input type="text" id="newPersonPhone" class="w-full bg-gray-700 rounded-lg px-4 py-2 border border-gray-600 focus:border-indigo-500 focus:outline-none" placeholder="+1 234 567 8900">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1">Department</label>
+                            <select id="newPersonDept" class="w-full bg-gray-700 rounded-lg px-4 py-2 border border-gray-600 focus:border-indigo-500 focus:outline-none">
+                                <option value="Engineering">Engineering</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="HR">Human Resources</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Operations">Operations</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button id="cancelRegistrationBtn" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
+                        Cancel
+                    </button>
+                    <button id="savePersonBtn" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
+                        <i data-feather="save"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chatbot -->
+        <div id="chatbotContainer" class="fixed bottom-6 right-6 z-40">
+            <button id="chatbotToggle" class="bg-indigo-600 hover:bg-indigo-700 w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition">
+                <i data-feather="message-square" class="w-6 h-6"></i>
+            </button>
+            <div id="chatbotWindow" class="hidden absolute bottom-16 right-0 w-80 bg-gray-800 rounded-t-lg rounded-bl-lg shadow-2xl border border-gray-700">
+                <div class="bg-gray-900 px-4 py-3 rounded-t-lg flex justify-between items-center">
+                    <h3 class="font-bold">FaceWhiz Assistant</h3>
+                    <button id="closeChatbotBtn" class="text-gray-400 hover:text-white">
+                        <i data-feather="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="chatbotMessages" class="p-4 h-60 overflow-y-auto">
+                    <div class="bg-gray-700 rounded-lg p-3 mb-3 max-w-[80%]">
+                        <p>Hello! I'm your FaceWhiz assistant. How can I help you with face recognition today?</p>
+                    </div>
+                </div>
+                <div class="p-3 border-t border-gray-700">
+                    <div class="flex gap-2">
+                        <input type="text" id="chatbotInput" placeholder="Type your message..." class="flex-1 bg-gray-700 rounded-lg px-4 py-2 border border-gray-600 focus:border-indigo-500 focus:outline-none">
+                        <button id="sendChatbotMessageBtn" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition">
+                            <i data-feather="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="components/navbar.js"></script>
+    <script src="script.js"></script>
+    <script>
+        feather.replace();
+    </script>
+
+</body>
+</html>

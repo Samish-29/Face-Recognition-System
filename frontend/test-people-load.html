@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test People Load</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-6">Test People Load</h1>
+        
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+            <h2 class="text-xl font-bold mb-4">People Loading Test</h2>
+            
+            <div id="loadingMessage" class="text-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+                <p>Loading people...</p>
+            </div>
+            
+            <div id="result" class="hidden"></div>
+            
+            <button onclick="testLoadPeople()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg">
+                Test Load People
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function testLoadPeople() {
+            const loadingEl = document.getElementById('loadingMessage');
+            const resultEl = document.getElementById('result');
+            
+            loadingEl.classList.remove('hidden');
+            resultEl.classList.add('hidden');
+            
+            try {
+                console.log('Fetching /api/people...');
+                const response = await fetch('/api/people');
+                console.log('Response status:', response.status);
+                
+                // Check if response is OK
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
+                    throw new Error(errorData.error || `Failed to load people: ${response.status}`);
+                }
+                
+                const people = await response.json();
+                console.log('People data:', people);
+                
+                loadingEl.classList.add('hidden');
+                resultEl.classList.remove('hidden');
+                
+                // Check if people is an array
+                if (!Array.isArray(people)) {
+                    resultEl.innerHTML = `<p class="text-red-400">Invalid response format: ${typeof people}</p>`;
+                    return;
+                }
+                
+                if (people.length === 0) {
+                    resultEl.innerHTML = '<p class="text-gray-400">No people registered yet</p>';
+                    return;
+                }
+                
+                resultEl.innerHTML = `
+                    <h3 class="text-lg font-bold mb-2">Loaded ${people.length} people:</h3>
+                    <ul class="space-y-2">
+                        ${people.map(person => `
+                            <li class="bg-gray-700 p-3 rounded-lg">
+                                <div class="font-bold">${person.name}</div>
+                                <div class="text-sm text-gray-400">${person.email || 'No email'}</div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading people:', error);
+                loadingEl.classList.add('hidden');
+                resultEl.classList.remove('hidden');
+                resultEl.innerHTML = `
+                    <div class="text-center">
+                        <p class="text-red-400 mb-4">Error loading people: ${error.message || 'Unknown error'}</p>
+                        <button onclick="testLoadPeople()" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto-run on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            testLoadPeople();
+        });
+    </script>
+</body>
+</html>

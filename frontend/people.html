@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>People - FaceWhiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <custom-navbar></custom-navbar>
+    
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Registered People</h1>
+            <a href="index.html" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg flex items-center gap-2">
+                <i data-feather="arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        
+        <div id="peopleList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- People cards will be loaded here -->
+        </div>
+        
+        <div id="loadingMessage" class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+            <p>Loading people...</p>
+        </div>
+        
+        <div id="emptyMessage" class="hidden text-center py-12">
+            <i data-feather="users" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+            <p class="text-xl text-gray-400">No people registered yet</p>
+            <a href="index.html" class="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-lg">
+                Go to Dashboard
+            </a>
+        </div>
+    </main>
+
+    <script src="components/navbar.js"></script>
+    <script>
+        feather.replace();
+        
+        async function loadPeople() {
+            try {
+                const response = await fetch('/api/people');
+                
+                // Check if response is OK
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
+                    throw new Error(errorData.error || `Failed to load people: ${response.status}`);
+                }
+                
+                const people = await response.json();
+                
+                document.getElementById('loadingMessage').classList.add('hidden');
+                
+                // Check if people is an array
+                if (!Array.isArray(people)) {
+                    console.error('Invalid response format:', people);
+                    document.getElementById('loadingMessage').innerHTML = '<p class="text-red-400">Invalid data format received</p>';
+                    return;
+                }
+                
+                if (people.length === 0) {
+                    document.getElementById('emptyMessage').classList.remove('hidden');
+                    return;
+                }
+                
+                const container = document.getElementById('peopleList');
+                container.innerHTML = people.map(person => {
+                    // Escape HTML to prevent XSS
+                    const escapeHtml = (text) => {
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    };
+                    
+                    return `
+                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center gap-4 mb-4">
+                            <img src="${person.imageUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(person.name || 'User')}" 
+                                 alt="${escapeHtml(person.name || 'Unknown')}" 
+                                 class="w-16 h-16 rounded-full object-cover border-2 border-indigo-500"
+                                 onerror="this.src='https://ui-avatars.com/api/?name=User'">
+                            <div>
+                                <h3 class="text-xl font-bold">${escapeHtml(person.name || 'Unknown')}</h3>
+                                <p class="text-gray-400">${escapeHtml(person.role || 'Employee')}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="text-gray-400">Email:</span> ${escapeHtml(person.email || 'N/A')}</p>
+                            <p><span class="text-gray-400">Phone:</span> ${escapeHtml(person.phone || 'N/A')}</p>
+                            <p><span class="text-gray-400">Department:</span> ${escapeHtml(person.department || 'N/A')}</p>
+                        </div>
+                        <button onclick="deletePerson('${person.id || ''}', '${escapeHtml(person.name || 'Unknown')}')" 
+                                class="mt-4 w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">
+                            Delete
+                        </button>
+                    </div>
+                `;
+                }).join('');
+                
+                feather.replace();
+            } catch (error) {
+                console.error('Error loading people:', error);
+                const loadingEl = document.getElementById('loadingMessage');
+                loadingEl.innerHTML = `
+                    <div class="text-center">
+                        <p class="text-red-400 mb-4">Error loading people: ${error.message || 'Unknown error'}</p>
+                        <button onclick="loadPeople()" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        async function deletePerson(id, name) {
+            if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+            
+            try {
+                const response = await fetch(`/api/people/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    loadPeople();
+                } else {
+                    alert('Failed to delete person');
+                }
+            } catch (error) {
+                console.error('Error deleting person:', error);
+                alert('Error deleting person');
+            }
+        }
+        
+        loadPeople();
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - FaceWhiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <custom-navbar></custom-navbar>
+    
+    <main class="container mx-auto px-4 py-8 max-w-2xl">
+        <h1 class="text-3xl font-bold mb-6">Settings</h1>
+        
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg space-y-6">
+            <div>
+                <h2 class="text-xl font-bold mb-4">Recognition Threshold</h2>
+                <p class="text-gray-400 mb-4">Adjust the similarity threshold for face recognition (lower = more strict)</p>
+                <input type="range" id="thresholdSlider" min="0.3" max="0.9" step="0.1" value="0.6" 
+                       class="w-full" oninput="updateThreshold(this.value)">
+                <div class="flex justify-between text-sm text-gray-400 mt-2">
+                    <span>Strict (0.3)</span>
+                    <span id="thresholdValue">0.6</span>
+                    <span>Lenient (0.9)</span>
+                </div>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold mb-4">System Information</h2>
+                <div class="space-y-2 text-sm">
+                    <p><span class="text-gray-400">Backend Status:</span> <span id="backendStatus">Checking...</span></p>
+                    <p><span class="text-gray-400">Total People:</span> <span id="totalPeople">-</span></p>
+                    <p><span class="text-gray-400">Database Location:</span> <span class="text-gray-400">backend/data/facewhiz.sqlite</span></p>
+                </div>
+            </div>
+            
+            <div>
+                <button onclick="checkBackend()" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg">
+                    Refresh Status
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-6">
+            <a href="index.html" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg inline-flex items-center gap-2">
+                <i data-feather="arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </main>
+
+    <script src="components/navbar.js"></script>
+    <script>
+        feather.replace();
+        
+        function updateThreshold(value) {
+            document.getElementById('thresholdValue').textContent = value;
+            localStorage.setItem('recognitionThreshold', value);
+        }
+        
+        // Load saved threshold
+        const savedThreshold = localStorage.getItem('recognitionThreshold');
+        if (savedThreshold) {
+            document.getElementById('thresholdSlider').value = savedThreshold;
+            document.getElementById('thresholdValue').textContent = savedThreshold;
+        }
+        
+        async function checkBackend() {
+    const statusEl = document.getElementById('backendStatus');
+    const peopleEl = document.getElementById('totalPeople');
+    
+    // Reset status
+    statusEl.textContent = 'Checking...';
+    statusEl.className = 'text-yellow-400';
+    peopleEl.textContent = '-';
+    
+    try {
+        // Try to fetch health endpoint
+        const healthRes = await fetch('/api/health', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            // Add timeout
+            signal: AbortSignal.timeout(5000) // 5 second timeout
+        });
+        
+        if (!healthRes.ok) {
+            throw new Error(`Backend returned status ${healthRes.status}`);
+        }
+        
+        const health = await healthRes.json();
+        console.log('Backend health check:', health);
+        
+        // Backend is connected
+        statusEl.textContent = 'Connected ✓';
+        statusEl.className = 'text-green-400';
+        
+        // Try to fetch people count
+        try {
+            const peopleRes = await fetch('/api/people', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                signal: AbortSignal.timeout(5000)
+            });
+            
+            if (peopleRes.ok) {
+                const people = await peopleRes.json();
+                peopleEl.textContent = people.length;
+            } else {
+                peopleEl.textContent = 'Error';
+            }
+        } catch (peopleError) {
+            console.error('Error fetching people:', peopleError);
+            peopleEl.textContent = 'Error';
+        }
+        
+    } catch (error) {
+        console.error('Backend connection error:', error);
+        
+        // Show detailed error
+        let errorMsg = 'Disconnected ✗';
+        if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+            errorMsg = 'Timeout - Backend not responding';
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            errorMsg = 'Network Error - Backend may be offline';
+        } else {
+            errorMsg = `Error: ${error.message}`;
+        }
+        
+        statusEl.textContent = errorMsg;
+        statusEl.className = 'text-red-400';
+        peopleEl.textContent = '-';
+        
+        // Show alert with troubleshooting info
+        console.log('Troubleshooting:');
+        console.log('1. Is backend server running? (npm run dev in backend/)');
+        console.log('2. Is backend on port 3000?');
+        console.log('3. Check browser console for CORS errors');
+        console.log('4. Try accessing http://localhost:3000/api/health directly');
+    }
+}
+        
+        checkBackend();
+    </script>
+</body>
+</html>
