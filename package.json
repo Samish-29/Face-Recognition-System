@@ -5,8 +5,8 @@
   "main": "backend/sever.js",
   "type": "module",
   "scripts": {
-    "start": "node backend/sever.js",
-    "dev": "nodemon backend/sever.js",
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
     "frontend": "cd frontend && npx vite",
     "build": "cd frontend && npx vite build",
     "setup": "node setup.js",
